@@ -10,6 +10,7 @@ packages = [{include = "echo_bot"}]
 python = "^3.11"
 flask = "^2.2.2"
 line-bot-sdk = "^2.3.0"
+gunicorn = "^20.1.0"
 
 
 [build-system]
