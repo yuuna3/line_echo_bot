@@ -7,10 +7,10 @@ readme = "README.md"
 packages = [{include = "echo_bot"}]
 
 [tool.poetry.dependencies]
-python = "^3.7"
-flask = "^2.2.2"
-line-bot-sdk = "^2.3.0"
-gunicorn = "^20.1.0"
+python = "^3.11"
+line-bot-sdk = "^3.5.0"
+flask = "^3.0.0"
+gunicorn = "^21.2.0"
 
 
 [build-system]
