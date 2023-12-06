@@ -3,9 +3,11 @@ import sys
 
 from flask import Flask, request, abort
 
-from linebot import LineBotApi, WebhookHandler
-from linebot.exceptions import LineBotApiError, InvalidSignatureError
-from linebot.models import MessageEvent, TextMessage, TextSendMessage, SourceUser
+from linebot import WebhookHandler
+
+from linebot.v3.webhooks import MessageEvent, TextMessageContent, UserSource
+from linebot.v3.messaging import Configuration, ApiClient, MessagingApi, TextMessage
+from linebot.v3.exceptions import InvalidSignatureError
 
 channel_access_token = os.environ["LINE_CHANNEL_ACCESS_TOKEN"]
 channel_secret = os.environ["LINE_CHANNEL_SECRET"]
@@ -14,10 +16,10 @@ if channel_access_token is None or channel_secret is None:
     print("Specify LINE_CHANNEL_ACCESS_TOKEN and LINE_CHANNEL_SECRET as environment variable.")
     sys.exit(1)
 
-app = Flask(__name__)
-
-line_bot_api = LineBotApi(channel_access_token)
 handler = WebhookHandler(channel_secret)
+configuration = Configuration(access_token=channel_access_token)
+
+app = Flask(__name__)
 
 
 @app.route("/callback", methods=["POST"])
@@ -32,36 +34,31 @@ def callback():
     # handle webhook body
     try:
         handler.handle(body, signature)
-    except LineBotApiError as e:
-        print("Got exception from LINE Messaging API: %s\n" % e.message)
-        for m in e.error.details:
-            print("  %s: %s" % (m.property, m.message))
-        print("\n")
-    except InvalidSignatureError:
-        abort(400)
+    except InvalidSignatureError as e:
+        abort(400, e)
 
     return "OK"
 
 
-@handler.add(MessageEvent, message=TextMessage)
+@handler.add(MessageEvent, message=TextMessageContent)
 def handle_text_message(event):
     text = event.message.text
-    if isinstance(event.source, SourceUser):
-        profile = line_bot_api.get_profile(event.source.user_id)
-        line_bot_api.reply_message(
-            event.reply_token,
-            [
-                TextSendMessage(text="From: " + profile.display_name),
-                TextSendMessage(text="Received message: " + text)
-            ],
-        )
-    else:
-        line_bot_api.reply_message(
-            event.reply_token,
-            [
-                TextSendMessage(text="Received message: " + text)
-            ]
-        )
+    with ApiClient(configuration) as api_client:
+        line_bot_api = MessagingApi(api_client)
+        if isinstance(event.source, UserSource):
+            profile = line_bot_api.get_profile(event.source.user_id)
+            line_bot_api.reply_message_with_http_info(
+                reply_token=event.reply_token,
+                messages=[
+                    TextMessage(text="From: " + profile.display_name),
+                    TextMessage(text="Received message: " + text),
+                ],
+            )
+        else:
+            line_bot_api.reply_message_with_http_info(
+                reply_token=event.reply_token, messages=[TextMessage(text="Received message: " + text)]
+            )
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8000, debug=True)
