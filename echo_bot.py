@@ -46,6 +46,9 @@ def generate_response(from_user, text):
         res.append(TextMessage(text="こんちゃー"))
     elif "おは" in text:
         res.append(TextMessage(text="おはよー"))
+    elif "何時" in text or "なんじ" in text:
+        now = datetime.datetime.now()
+        res.append(TextMessage(text=f"今は{now.hour}時{now.minute}分ですよ"))
     else:
         res.append(TextMessage(text=f"「{text}」ってなに？"))
     return res
