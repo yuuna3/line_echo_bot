@@ -41,13 +41,13 @@ def callback():
 
 def genetate_response(from_user, text):
     res=[]
-    res.append(f"おー{from_user}さん！")
+    res.append(TextMessage(text=f"おー{from_user}さん！"))
     if "こん" in text:
-        res.append("こんちゃー")
+        res.append(TextMessage(text="こんちゃー"))
     elif "おは" in text:
-        res.append("おはよー")
+        res.append(TextMessage(text="おはよー"))
     else:
-        res.append(f"「{text}」ってなに？")
+        res.append(TextMessage(text=f"「{text}」ってなに？"))
     return res
 
 @handler.add(MessageEvent, message=TextMessageContent)
