@@ -39,6 +39,8 @@ def callback():
 
     return "OK"
 
+import datetime
+
 def generate_response(from_user, text):
     res=[]
     res.append(TextMessage(text=f"おー{from_user}さん！"))
