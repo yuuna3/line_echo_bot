@@ -39,7 +39,7 @@ def callback():
 
     return "OK"
 
-def genetate_response(from_user, text):
+def generate_response(from_user, text):
     res=[]
     res.append(TextMessage(text=f"おー{from_user}さん！"))
     if "こん" in text:
